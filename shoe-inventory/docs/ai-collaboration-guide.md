@@ -4,9 +4,9 @@
 Every source code file MUST include this header comment:
 
 ```typescript
-// LOGGING: All changes to this file must be documented in CHANGELOG.md
-// Include: timestamp, author (AI name), files modified, changes made
-// Reference: See docs/logging-instructions.md for detailed guidelines
+// LOGGING: All changes to this file must be documented in CHANGELOG.md using JSON format
+// Include: timestamp, file path, change_type, summary, author, and diff if applicable
+// Reference: See docs/logging-instructions.md for detailed JSON format guidelines
 ```
 
 ## Detailed Logging Requirements
@@ -18,26 +18,30 @@ Every source code file MUST include this header comment:
 - Inline comments for complex logic
 - Change history section at the bottom (optional but recommended)
 
-### 2. Change Log Entries Must Include:
-- **Timestamp**: ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)
-- **AI Model**: Which AI made the changes (e.g., "Claude-3", "GPT-4")
-- **Files Modified**: Complete list of files affected
-- **Changes Made**: Specific code changes with context
-- **Purpose**: Why the changes were made
-- **Testing**: What testing was performed
+### 2. Change Log Entries Must Use JSON Format:
+- **Required Fields**:
+  - `timestamp`: ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)
+  - `file`: Full path to the file that was changed
+  - `change_type`: One of "creation", "modification", "deletion"
+  - `summary`: Brief description of what was changed and why
+  - `author`: Name of the AI or person making the change
+- **Optional Fields**:
+  - `diff`: Git-style diff output showing exact changes (recommended for modifications)
+  - `testing`: Description of testing performed
+  - `purpose`: Business or technical rationale for the change
 
-### 3. Example Detailed Log Entry
-```
-## [2025-09-21T04:15:00Z] - AI: Claude-3
-- **Files Modified**: 
-  - `src/services/firestore.ts`: Added shoeService with CRUD operations
-  - `src/types/shoe.ts`: Defined Shoe interface with brand, model, size
-- **Changes Made**:
-  - Implemented getShoes() method with Firestore query
-  - Added TypeScript interfaces for type safety
-  - Included error handling for database operations
-- **Purpose**: Create foundation for shoe data management
-- **Testing**: Manual testing of Firestore connection successful
+### 3. Example JSON Change Entry
+```json
+{
+  "timestamp": "2025-09-21T04:15:00Z",
+  "file": "src/services/firestore.ts",
+  "change_type": "modification",
+  "summary": "Added shoeService with CRUD operations for Firestore integration",
+  "diff": "@@ -1,3 +1,15 @@\n+ import { collection, addDoc, getDocs } from 'firebase/firestore';\n+ export class ShoeService {\n+   async getShoes() {\n+     const querySnapshot = await getDocs(collection(db, 'shoes'));\n+     return querySnapshot.docs.map(doc => doc.data());\n+   }\n+ }",
+  "author": "AI: DeepSeek Reasoner",
+  "testing": "Manual verification of Firestore connection and data retrieval",
+  "purpose": "Create foundation for shoe data management in the inventory system"
+}
 ```
 
 ## Is This Overkill?
@@ -72,9 +76,11 @@ Every source code file MUST include this header comment:
 - Document decisions, not just code changes
 
 ### 2. Version Control Integration
-- Commit messages should reference log entries
-- Use branches for experimental changes
-- Tag commits with AI model information
+- **Every major change must include a detailed git commit** with descriptive message
+- Commit messages should reference CHANGELOG.md entries and include change summary
+- Use branches for experimental changes and feature development
+- Tag commits with AI model information for traceability
+- Commit messages should follow conventional format: "feat: ", "fix: ", "docs: ", etc.
 
 ### 3. Code Quality Measures
 - Include unit tests with all significant changes
@@ -92,9 +98,9 @@ Every source code file MUST include this header comment:
 ```bash
 # Add logging headers to all source files
 find src/ -name "*.ts" -exec sed -i '' '1i\
-// LOGGING: All changes to this file must be documented in CHANGELOG.md\
-// Include: timestamp, author (AI name), files modified, changes made\
-// Reference: See docs/logging-instructions.md for detailed guidelines\
+// LOGGING: All changes to this file must be documented in CHANGELOG.md using JSON format\
+// Include: timestamp, file path, change_type, summary, author, and diff if applicable\
+// Reference: See docs/logging-instructions.md for detailed JSON format guidelines\
 ' {} \;
 ```
 
